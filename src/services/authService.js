@@ -1,10 +1,12 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
+import pkg from "@prisma/client";
 import { config } from "../config/env.js";
 import { logger } from "../utils/index.js";
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+
+const { PrismaClient } = pkg;
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
