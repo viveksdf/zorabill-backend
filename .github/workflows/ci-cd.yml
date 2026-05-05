@@ -1,0 +1,46 @@
+name: Deploy Node Application
+
+on: 
+  push:
+    branches:
+      - develop
+
+env:
+  DOCKER_IMAGE: zorabill-backend
+  DOCKER_CONTAINER: zorabill-backend-container
+  PORT: 3000
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }} .
+
+      - name: Publish Image to Docker Hub
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}:latest
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Pull Image from Docker Hub
+        run: docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}:latest
+
+      - name: Delete Old Container
+        run: docker rm -f ${{ env.DOCKER_CONTAINER }} || true
+
+      - name: Run Docker Container
+        run: |
+          docker run -d \
+            -p ${{ env.PORT }}:${{ env.PORT }} \
+            --name ${{ env.DOCKER_CONTAINER }} \
+            -e DATABASE_URL='${{ secrets.DATABASE_URL }}' \
+            -e NODE_ENV='development' \
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}:latest
