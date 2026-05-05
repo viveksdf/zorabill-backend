@@ -9,6 +9,9 @@ env:
   DOCKER_IMAGE: zorabill-backend
   DOCKER_CONTAINER: zorabill-backend-container
   PORT: 3000
+  JWT_EXPIRY: 5m
+  JWT_REFRESH_EXPIRY: 30m
+  LOG_LEVEL: debug
 
 jobs:
   build:
@@ -43,4 +46,9 @@ jobs:
             --name ${{ env.DOCKER_CONTAINER }} \
             -e DATABASE_URL='${{ secrets.DATABASE_URL }}' \
             -e NODE_ENV='development' \
+            -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
+            -e JWT_REFRESH_SECRET='${{ secrets.JWT_REFRESH_SECRET }}' \
+            -e JWT_EXPIRY='${{ env.JWT_EXPIRY }}' \
+            -e JWT_REFRESH_EXPIRY='${{ env.JWT_REFRESH_EXPIRY }}' \
+            -e LOG_LEVEL='${{ env.LOG_LEVEL }}' \
             ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE }}:latest
