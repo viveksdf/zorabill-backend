@@ -4,16 +4,13 @@ WORKDIR /app
 # Install dependencies only from package.json
 COPY package.json package-lock.json* ./
 
+COPY prisma ./prisma/
+
 # Copy all files
 COPY . .
 
-# Generate Prisma Client (requires DATABASE_URL, set dummy if not available)
-RUN if [ -z "$DATABASE_URL" ]; then \
-      echo "DATABASE_URL not set, using dummy for build"; \
-      DATABASE_URL="postgresql://user:password@localhost:5432/db" npx prisma generate; \
-    else \
-      npx prisma generate; \
-    fi
+# Generate Prisma Client
+RUN npm run prisma:generate
 
 # Expose the port your app runs on
 EXPOSE 3000 
