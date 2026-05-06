@@ -1,19 +1,23 @@
-FROM node:20-alpine AS base
+FROM node:20-alpine
 WORKDIR /app
 
-# Install dependencies only from package.json
+# Copy package files
 COPY package.json package-lock.json* ./
 
+# Copy Prisma schema
 COPY prisma ./prisma/
 
-# Copy all files
-COPY . .
+# Install dependencies
+RUN npm install
 
 # Generate Prisma Client
 RUN npm run prisma:generate
 
-# Expose the port your app runs on
-EXPOSE 3000 
+# Copy application code
+COPY . .
 
-# Run the app using the start script
-CMD [ "npm", "run", "start" ]
+# Expose the port
+EXPOSE 3000
+
+# Run the app
+CMD ["npm", "run", "start"]
